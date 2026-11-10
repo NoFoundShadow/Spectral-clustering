@@ -99,6 +99,45 @@ Kiểm tra nhanh phần đồ thị đã tích hợp:
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
+## Trực quan hóa kết quả phân cụm
+
+`src/spectral_clustering/visualization.py` cung cấp hàm vẽ dữ liệu hai chiều
+và hình so sánh baseline. Hai hàm chỉ vẽ dữ liệu và nhãn đã có, không tự chạy
+thuật toán hay chuẩn hóa dữ liệu.
+
+```python
+import matplotlib.pyplot as plt
+
+from spectral_clustering.visualization import (
+    plot_baseline_comparison,
+    plot_clusters,
+)
+
+# X, kmeans_labels và dbscan_labels đã được tạo bởi pipeline baseline.
+figure_1, axis = plot_clusters(X, kmeans_labels, title="K-Means")
+figure_2, axes = plot_baseline_comparison(
+    X,
+    kmeans_labels,
+    dbscan_labels,
+    title="Moons - seed=42",
+    save_path="results/figures/baselines/moons.png",
+)
+
+plt.show()
+plt.close(figure_1)
+plt.close(figure_2)
+```
+
+`X` phải có shape `(n_samples, 2)` và mỗi mảng nhãn phải có shape
+`(n_samples,)`. Với DBSCAN, nhãn `-1` được quy ước là noise. Mã màu của một
+cụm trong hai thuật toán là độc lập vì ID cụm chỉ là nhãn tùy ý. Người gọi
+chịu trách nhiệm gọi `plt.show()` hoặc `plt.close()`.
+
+Hình baseline chính thức được lưu trong `results/figures/baselines/`. Khi vẽ,
+phải truyền đúng `X` đã dùng để chạy thuật toán. Nhãn thật chỉ dùng để đánh giá
+hoặc làm panel đối chiếu có ghi rõ; không đưa nhãn thật vào đặc trưng và không
+dùng nhãn thật thay cho nhãn dự đoán trong hình kết quả.
+
 ## Quy trình Git
 
 Repository hiện chưa được khởi tạo Git, vì vậy quy trình dùng nhánh `master` theo quy ước của nhóm:
