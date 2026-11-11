@@ -79,3 +79,40 @@ def graph_matrices_from_edges(
     degree = degree_matrix(adjacency)
     laplacian = unnormalized_laplacian(adjacency)
     return adjacency, degree, laplacian
+
+# Compute Euclid distance
+def pairwise_distance(X: ArrayLike) -> NDArray[np.float64]:
+    points = np.asarray(X, dtype=float)
+    if points.ndim != 2:
+        raise ValueError("X must have shape (n_samples, n_features)")
+    if points.shape[0] == 0 or points.shape[1] == 0:
+        raise ValueError("X must contain samples and features")
+    if not np.all(np.isfinite(points)):
+        raise ValueError("X must contain only finite values")
+
+    n_samples = points.shape[0]
+    distances = np.zeros((n_samples, n_samples), dtype=float)
+
+    for i in range(n_samples):
+        differences = points[i + 1:] - points[i]
+        values = np.linalg.norm(differences, axis=1)
+
+        distances[i, i + 1:] = values
+        distances[i + 1:, i] = values
+
+    return distances
+
+
+def rbf_affinity(
+    X: ArrayLike,
+    gamma: float = 1.0,
+) -> NDArray[np.float64]:
+    gamma = float(gamma)
+    if not np.isfinite(gamma) or gamma <= 0:
+        raise ValueError("gamma must be finite and positive")
+
+    distances = pairwise_distance(X)
+    adjacency = np.exp(-gamma * distances**2)
+    np.fill_diagonal(adjacency, 0.0)
+
+    return adjacency
