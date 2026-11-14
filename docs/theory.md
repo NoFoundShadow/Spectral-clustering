@@ -43,6 +43,7 @@ K-Means gán mỗi điểm dữ liệu \(x\) vào centroid gần nó nhất:
 \[
 Cluster(x)=\arg\min_{j}||x-C_j||^2
 \]
+
 Khi có hai centroid, ranh giới phân chia hai cụm là tập hợp các điểm có khoảng cách đến hai centroid bằng nhau:
 
 \[
