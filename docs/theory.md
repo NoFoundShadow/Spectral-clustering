@@ -39,13 +39,17 @@ Centroid (tâm cụm) khó tách các cụm có hình dạng cong vì nó phân 
 Để hiểu rõ, hãy xét cách K-Means sử dụng centroid.
 Giả sử có hai centroid \(C_1\) và \(C_2\).
 K-Means gán mỗi điểm dữ liệu \(x\) vào centroid gần nó nhất:
+
 \[
 Cluster(x)=\arg\min_{j}||x-C_j||^2
 \]
 Khi có hai centroid, ranh giới phân chia hai cụm là tập hợp các điểm có khoảng cách đến hai centroid bằng nhau:
+
 \[
+
 ||x-C_1||^2=||x-C_2||^2
 \]
+
 Đây chính là phương trình của một đường thẳng trong không gian 2 chiều (một siêu phẳng trong không gian nhiều chiều).
 Nói cách khác, K-Means thường tạo ra những vùng phân chia có dạng lồi (convex), không thể linh hoạt uốn cong theo hình dạng dữ liệu.
 
@@ -71,10 +75,15 @@ Hai điểm xa nhau: Khoảng cách lớn → \(W_{ij}\) nhỏ → Mức độ t
 
 Giả sử \(\gamma=0.5\).
 Khoảng cách bình phương	Trọng số RBF
+
 0	1
+
 1	0.6065
+
 2	0.3679
+
 4	0.1353
+
 6	0.0498
 
 Ta thấy khoảng cách càng lớn thì trọng số càng tiến gần về 0.
