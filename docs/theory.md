@@ -31,3 +31,66 @@ Hai bước này làm `J` giảm hoặc giữ nguyên, nhưng không bảo đả
 - **Spectral Clustering** có thể phù hợp với cấu trúc phi tuyến như hai vòng tròn đồng tâm hoặc hai nửa mặt trăng. Phương pháp xây dựng ma trận tương đồng rồi dùng trị riêng và vector riêng để tạo biểu diễn trước khi phân cụm.
 
 Việc thay thuật toán cần dựa trên cấu trúc dữ liệu và mục tiêu đánh giá, không chỉ dựa trên một ví dụ trực quan.
+
+### Vì sao centroid khó tách cụm cong
+
+Centroid (tâm cụm) khó tách các cụm có hình dạng cong vì nó phân cụm dựa trên khoảng cách từ mỗi điểm đến tâm cụm, chứ không dựa trên cấu trúc hình dạng hoặc sự kết nối giữa các điểm dữ liệu.
+
+Để hiểu rõ, hãy xét cách K-Means sử dụng centroid.
+Giả sử có hai centroid \(C_1\) và \(C_2\).
+K-Means gán mỗi điểm dữ liệu \(x\) vào centroid gần nó nhất:
+\[
+Cluster(x)=\arg\min_{j}||x-C_j||^2
+\]
+Khi có hai centroid, ranh giới phân chia hai cụm là tập hợp các điểm có khoảng cách đến hai centroid bằng nhau:
+\[
+||x-C_1||^2=||x-C_2||^2
+\]
+Đây chính là phương trình của một đường thẳng trong không gian 2 chiều (một siêu phẳng trong không gian nhiều chiều).
+Nói cách khác, K-Means thường tạo ra những vùng phân chia có dạng lồi (convex), không thể linh hoạt uốn cong theo hình dạng dữ liệu.
+
+#### Giải thích similarity RBF
+
+Trong Spectral Clustering, Similarity RBF (Radial Basis Function) được sử dụng để đo mức độ tương đồng giữa hai điểm dữ liệu \(x_i\) và \(x_j\) trong cùng một tập dữ liệu \(X\).
+
+Công thức RBF:
+\[
+W_{ij}=\exp(-\gamma\|x_i-x_j\|^2)
+\]
+
+Trong đó:
+- \(x_i,x_j\): Hai điểm dữ liệu trong tập \(X\).
+- \(\|x_i-x_j\|^2\): Bình phương khoảng cách Euclidean giữa hai điểm.
+- \(\gamma\): Tham số điều chỉnh mức độ suy giảm của similarity.
+- \(W_{ij}\): Trọng số thể hiện mức độ tương đồng giữa hai điểm.
+
+Ý nghĩa trực quan:
+
+Hai điểm gần nhau: Khoảng cách nhỏ → \(W_{ij}\) lớn → Mức độ tương đồng cao.
+Hai điểm xa nhau: Khoảng cách lớn → \(W_{ij}\) nhỏ → Mức độ tương đồng thấp.
+
+Giả sử \(\gamma=0.5\).
+Khoảng cách bình phương	Trọng số RBF
+0	1
+1	0.6065
+2	0.3679
+4	0.1353
+6	0.0498
+
+Ta thấy khoảng cách càng lớn thì trọng số càng tiến gần về 0.
+
+Vai trò của gamma:
+\(\gamma\) quyết định mức độ nhạy của RBF đối với khoảng cách:
+- \(\gamma\) lớn: Trọng số giảm nhanh khi khoảng cách tăng. Chỉ những điểm rất gần nhau mới có similarity đáng kể.
+- \(\gamma\) nhỏ: Trọng số giảm chậm. Những điểm ở xa hơn vẫn có thể có similarity đáng kể.
+
+Sau khi tính similarity giữa các cặp điểm trong tập \(X\), ta thu được ma trận trọng số \(W\).Từ \(W\), ta tiếp tục tính:
+\[
+D_{ii}=\sum_j W_{ij}
+\]
+
+Sau đó ta tính được \[
+L=D-W
+\]
+
+Điểm quan trọng: RBF không trực tiếp phân cụm dữ liệu. Nó chỉ giúp chuyển dữ liệu từ không gian đặc trưng ban đầu thành một đồ thị có trọng số, làm cơ sở cho Spectral Clustering thực hiện phân cụm.
