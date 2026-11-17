@@ -2,9 +2,9 @@
 
 ## 1. Dataset nhân tạo
 
-Toàn bộ dữ liệu thử nghiệm 2D được sinh qua điểm gọi chung `make_synthetic(name, seed=42)` trong `src/spectral_clustering/datasets.py` với `n_samples=300` mặc định. Bốn hàm sinh riêng (`generate_blobs`, `generate_moons`, `generate_circles`, `generate_anisotropic_blobs`) giữ mặc định `n_samples=500` cho các thử nghiệm bổ sung.
+Nhóm tạo 4 bộ dữ liệu 2D qua hàm `make_synthetic(name, seed=42)` trong `src/spectral_clustering/datasets.py` với mặc định `n_samples=300`. Bốn hàm sinh riêng (`generate_blobs`, `generate_moons`, `generate_circles`, `generate_anisotropic_blobs`) vẫn giữ mặc định `n_samples=500` cho các thử nghiệm khác. Cùng một giá trị `seed=42` luôn trả về cặp mảng `X` có kích thước `(300, 2)` và `y` có kích thước `(300,)` giống nhau qua mỗi lần gọi.
 
-Cách gọi chuẩn để B và D dùng lại đúng dữ liệu:
+Ví dụ cách gọi hàm sinh dữ liệu chuẩn:
 
 ```python
 from spectral_clustering.datasets import make_synthetic
@@ -21,21 +21,19 @@ Thông số mặc định của 4 bộ dữ liệu chuẩn (`n_samples=300`, `se
 | `circles` | 300 | 2 | `factor=0.5`, `noise=0.05` |
 | `anisotropic` | 300 | 3 | `centers=3`, `cluster_std=1.0`, nhân ma trận `[[0.6, -0.6], [-0.4, 0.8]]` |
 
-Kiểm tra tính tái lập: đã gọi `make_synthetic(name, seed=42)` hai lần liên tiếp cho cả 4 tên. Mỗi lần đều trả về `X` kích thước `(300, 2)` và `y` kích thước `(300,)` trùng khớp từng phần tử, số nhãn tương ứng là `3, 2, 2, 3`.
-
 ## 2. Cấu hình Baseline (K-Means & DBSCAN)
 
 ### Chuẩn hóa dữ liệu
 
-Mỗi bộ dữ liệu được chuẩn hóa một lần bằng hàm `standardize_features(X)` trong `src/spectral_clustering/preprocessing.py` (dùng `StandardScaler().fit_transform(X)`). Cả K-Means và DBSCAN đều chạy trên cùng mảng `X_scaled` này; nhãn thật `y` được giữ riêng làm tham chiếu.
+Trước khi phân cụm, ta chuẩn hóa từng bộ dữ liệu một lần qua hàm `standardize_features(X)` trong `src/spectral_clustering/preprocessing.py` (dùng `StandardScaler().fit_transform(X)`). Cả K-Means và DBSCAN đều chạy trên cùng mảng `X_scaled` này, còn nhãn thật `y` được giữ riêng để đối chiếu kết quả.
 
 ### Tham số K-Means
 
-Chạy qua `run_kmeans(X_scaled, n_clusters, random_state=42)` trong `src/spectral_clustering/baselines.py` với `n_init=10` và `n_clusters` lần lượt là `3, 2, 2, 3` theo thứ tự `blobs`, `moons`, `circles`, `anisotropic`.
+Ta chạy `run_kmeans(X_scaled, n_clusters, random_state=42)` trong `src/spectral_clustering/baselines.py` với `n_init=10` và số cụm `n_clusters` lần lượt là `3, 2, 2, 3` cho `blobs`, `moons`, `circles`, `anisotropic`.
 
 ### Kết quả thử lưới tham số DBSCAN
 
-Chạy qua `run_dbscan(X_scaled, eps, min_samples)` (`metric="euclidean"`) trên `X_scaled` của từng bộ với lưới `eps` thuộc `{0.15, 0.25, 0.40}` và `min_samples` thuộc `{5, 10}`. Số cụm dưới đây không tính nhãn noise `-1`.
+Hàm `run_dbscan(X_scaled, eps, min_samples)` (`metric="euclidean"`) được chạy trên `X_scaled` của từng bộ dữ liệu qua lưới `eps` gồm `{0.15, 0.25, 0.40}` và `min_samples` gồm `{5, 10}`. Số cụm tìm được trong bảng không tính nhãn noise `-1`.
 
 | Dataset | `eps` | `min_samples` | Số cụm tìm được | Tỉ lệ noise |
 | --- | --- | --- | --- | --- |
@@ -66,9 +64,6 @@ Chạy qua `run_dbscan(X_scaled, eps, min_samples)` (`metric="euclidean"`) trên
 
 ### Cấu hình DBSCAN chọn để vẽ baseline
 
-Kết quả chi tiết từng bộ được lưu trong `baseline_results` tại `notebooks/01_baselines.ipynb` với các khóa `X_scaled`, `y`, `kmeans_labels`, `dbscan_labels`, `n_clusters`, `eps`, `min_samples`:
+Với `blobs`, `moons` và `anisotropic`, cặp tham số `eps=0.25, min_samples=5` tách đúng số cụm kỳ vọng (`3, 2, 3`) và hầu như không làm mất mẫu (0.3% noise trên `blobs`, 0.0% trên hai bộ còn lại). Riêng với `circles`, các mức `eps` nhỏ hơn đều khiến hai vòng tròn bị vỡ thành 7 đến 18 cụm nhỏ hoặc có từ 50% đến 96.7% điểm rơi vào noise, nên ta chọn `eps=0.40, min_samples=5` vì đây là cấu hình duy nhất trong lưới tách được trọn vẹn 2 vòng tròn với 0.0% noise.
 
-- `blobs`: `eps=0.25, min_samples=5` (tách đúng 3 cụm, giữ được điểm biên sát thực tế với 0.3% noise).
-- `moons`: `eps=0.25, min_samples=5` (tách gọn 2 nửa mặt trăng, không đứt cụm và 0.0% noise).
-- `circles`: `eps=0.40, min_samples=5` (lựa chọn duy nhất trong lưới tách đúng 2 vòng tròn đồng tâm mà không vỡ cụm hay mất mẫu; các mức `eps` nhỏ hơn bị chia thành 7 hoặc 18 cụm nhỏ hoặc gán 50% đến 96.7% mẫu thành noise).
-- `anisotropic`: `eps=0.25, min_samples=5` (tách đúng 3 cụm kéo dãn với 0.0% noise).
+Kết quả chạy baseline của cả 4 bộ được lưu sẵn trong từ điển `baseline_results` ở `notebooks/01_baselines.ipynb`, gồm các khóa `X_scaled`, `y`, `kmeans_labels`, `dbscan_labels`, `n_clusters`, `eps` và `min_samples`.

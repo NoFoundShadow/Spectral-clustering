@@ -95,7 +95,6 @@ def generate_anisotropic_blobs(
     return np.asarray(X_aniso, dtype=np.float64), np.asarray(y, dtype=np.int64)
 
 
-# Alias tương thích
 make_blobs_dataset = generate_blobs
 make_moons_dataset = generate_moons
 make_circles_dataset = generate_circles
