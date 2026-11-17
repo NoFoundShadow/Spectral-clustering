@@ -1,5 +1,7 @@
 """Tạo các tập dữ liệu nhân tạo 2D (Blobs, Moons, Circles, Anisotropic Blobs)."""
 
+from typing import Any
+
 import numpy as np
 from numpy.typing import NDArray
 from sklearn.datasets import make_blobs, make_circles, make_moons
@@ -92,7 +94,6 @@ def generate_anisotropic_blobs(
     return np.asarray(X_aniso, dtype=np.float64), np.asarray(y, dtype=np.int64)
 
 
-# Alias tương thích
 make_blobs_dataset = generate_blobs
 make_moons_dataset = generate_moons
 make_circles_dataset = generate_circles
@@ -106,7 +107,18 @@ _GENERATORS = {
     "anisotropic": generate_anisotropic_blobs,
 }
 
-def make_synthetic(name: str, **kwargs):
-    """Tạo dữ liệu nhân tạo 2D theo tên dataset."""
-    return _GENERATORS[name](**kwargs)
+
+def make_synthetic(
+    name: str,
+    n_samples: int = 300,
+    seed: int = 42,
+    **kwargs: Any,
+) -> tuple[NDArray[np.float64], NDArray[np.int64]]:
+    """Tạo bộ dữ liệu chuẩn theo tên ('blobs', 'moons', 'circles', 'anisotropic')."""
+    key = name.strip().lower()
+    if key not in _GENERATORS:
+        raise ValueError(
+            f"Tên dataset không hợp lệ: {name!r}. Chọn trong: {tuple(_GENERATORS)}"
+        )
+    return _GENERATORS[key](n_samples=n_samples, seed=seed, **kwargs)
 
