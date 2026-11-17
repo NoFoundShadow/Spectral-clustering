@@ -19,8 +19,7 @@ def generate_blobs(
     n_samples: int = 500,
     centers: int = 3,
     cluster_std: float = 1.0,
-    random_state: int | None = None,
-    seed: int | None = None,
+    random_state: int | None = None, seed: int | None = None,
 ) -> tuple[NDArray[np.float64], NDArray[np.int64]]:
     """Tạo dữ liệu Blobs 2D (cụm dạng hình cầu)."""
     r_state = _get_random_state(random_state, seed)
@@ -100,6 +99,7 @@ make_moons_dataset = generate_moons
 make_circles_dataset = generate_circles
 make_anisotropic_dataset = generate_anisotropic_blobs
 
+# Bảng ánh xạ tên dataset -> hàm sinh dữ liệu
 _GENERATORS = {
     "blobs": generate_blobs,
     "moons": generate_moons,
