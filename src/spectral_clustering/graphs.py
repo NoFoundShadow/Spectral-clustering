@@ -69,6 +69,18 @@ def unnormalized_laplacian(adjacency: ArrayLike) -> NDArray[np.float64]:
     matrix = _validate_adjacency(adjacency)
     return np.diag(matrix.sum(axis=1)) - matrix
 
+def normalized_laplacian(adjacency: ArrayLike) -> NDArray[np.float64]:
+    """Return the symmetric normalized Laplacian for a graph with positive degrees."""
+    W = _validate_adjacency(adjacency)
+    degrees = W.sum(axis=1)
+
+    if np.any(degrees == 0):
+        raise ValueError("Cannot normalize a graph with a zero-degree node")
+
+    inv_sqrt = 1.0 / np.sqrt(degrees)
+    normalized_W = inv_sqrt[:, None] * W * inv_sqrt[None, :]
+
+    return np.eye(W.shape[0]) - normalized_W
 
 def graph_matrices_from_edges(
     n_nodes: int,
