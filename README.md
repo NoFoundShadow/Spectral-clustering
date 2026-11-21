@@ -118,7 +118,8 @@ figure_1, axis = plot_clusters(X, kmeans_labels, title="K-Means")
 figure_2, axes = plot_baseline_comparison(
     X,
     kmeans_labels,
-    dbscan_labels,
+    dbscan_labels, 
+    y=y,
     title="Moons - seed=42",
     save_path="results/figures/baselines/moons.png",
 )
@@ -140,7 +141,7 @@ dùng nhãn thật thay cho nhãn dự đoán trong hình kết quả.
 
 ## Quy trình Git
 
-Repository hiện chưa được khởi tạo Git, vì vậy quy trình dùng nhánh `master` theo quy ước của nhóm:
+Nhóm dùng `master` làm nhánh tích hợp. Mỗi đầu việc được thực hiện trên một nhánh riêng và đưa vào `master` qua Pull Request.
 
 1. Cập nhật `master` (`git switch master`, rồi `git pull`).
 2. Tạo branch mới theo đầu việc.
