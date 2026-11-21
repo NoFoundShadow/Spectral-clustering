@@ -70,37 +70,43 @@ Kết quả chạy baseline của cả 4 bộ được lưu sẵn trong từ đi
 
 ## 3. So sánh Spectral Clustering với Scikit-learn
 
-Mục tiêu: So sánh kết quả phân cụm của thuật toán Spectral Clustering do nhóm triển khai với SpectralClustering trong thư viện Scikit-learn.
+Mục tiêu: So sánh kết quả phân cụm của thuật toán Spectral Clustering do nhóm triển khai với SpectralClustering trong thư viện Scikit-learn, tính ARI và NMI của từng kết quả phân cụm so với nhãn thật `y`.
 
 Điều kiện so sánh: Để đảm bảo tính công bằng, cả hai phương pháp sử dụng chung các thiết lập:
--Dữ liệu đầu vào: Cùng một tập dữ liệu X.
--Ma trận trọng số: Cùng ma trận affinity W được xây dựng từ dữ liệu đầu vào bằng RBF kernel.
--Số cụm: Cùng giá trị n_clusters = k.
--Random seed: Cùng giá trị random_state = 42.
+- Dữ liệu đầu vào: Cùng một tập dữ liệu đã chuẩn hóa `X_scaled`.
+- RBF kernel: Cùng giá trị `gamma` khi xây dựng ma trận trọng số.
+- Ma trận trọng số: Cùng ma trận affinity `W` được xây dựng từ `X_scaled` bằng RBF kernel.
+- Số cụm: Cùng giá trị `n_clusters = k`.
+- Random seed: Cùng giá trị `random_state = 42`.
 
 ### Cấu hình Scikit-learn
 
 Sử dụng SpectralClustering với các tham số tương ứng:
-'from sklearn.cluster import SpectralClustering
+```python
+from sklearn.cluster import SpectralClustering
 
 sklearn_model = SpectralClustering(
-    n_clusters=k,
-    affinity="precomputed",
-    assign_labels="kmeans",
-    random_state=42
+    n_clusters = k,
+    affinity = "precomputed",
+    assign_labels = "kmeans",
+    random_state = 42
 )
 
-sklearn_labels = sklearn_model.fit_predict(W)'
+sklearn_labels = sklearn_model.fit_predict(W)
+```
 
 Trong đó:
--n_clusters: Số cụm cần tìm.
--affinity="precomputed": Sử dụng trực tiếp ma trận trọng số W đã được xây dựng, thay vì để Scikit-learn tự tính affinity.
--assign_labels="kmeans": Sau khi thực hiện Spectral Clustering và biến đổi dữ liệu sang không gian phổ (spectral space), sử dụng thuật toán K-Means để chia các điểm dữ liệu thành k cụm.
--random_state=42: Cố định seed để tăng khả năng tái lập kết quả.
+- n_clusters: Số cụm cần tìm.
+- affinity="precomputed": Sử dụng trực tiếp ma trận trọng số W đã được xây dựng, thay vì để Scikit-learn tự tính affinity.
+- assign_labels="kmeans": Sau khi thực hiện Spectral Clustering và biến đổi dữ liệu sang không gian phổ (spectral space), sử dụng thuật toán K-Means để chia các điểm dữ liệu thành k cụm.
+- random_state=42: Cố định seed để tăng khả năng tái lập kết quả.
 
 > **Note:** affinity="precomputed" rất quan trọng: nếu không có nó, Scikit-learn sẽ tự xây dựng ma trận affinity, khiến hai phương pháp không còn sử dụng cùng W.
 
 ### Đánh giá kết quả
 
--Sử dụng hai chỉ số Adjusted Rand Index (ARI) và Normalized Mutual Information (NMI) để đánh giá mức độ tương đồng giữa kết quả của nhóm và Scikit-learn. Do nhãn cụm không có thứ tự cố định, không so sánh trực tiếp giá trị nhãn giữa hai phương pháp. Thay vào đó, sử dụng ARI và NMI để đánh giá mức độ tương đồng của cách phân chia dữ liệu.
--Ngoài ra, có thể so sánh trực quan kết quả phân cụm thông qua biểu đồ scatter plot, sử dụng cùng dữ liệu đầu vào để quan sát sự khác biệt giữa hai phương pháp.
+- Sử dụng hai chỉ số Adjusted Rand Index (ARI) và Normalized Mutual Information (NMI) để đánh giá mức độ tương đồng giữa kết quả của nhóm và Scikit-learn. Do nhãn cụm không có thứ tự cố định, không so sánh trực tiếp giá trị nhãn giữa hai phương pháp. Thay vào đó, sử dụng ARI và NMI để đánh giá mức độ tương đồng của cách phân chia dữ liệu.
+
+- Ngoài ra, có thể so sánh trực quan kết quả phân cụm thông qua biểu đồ scatter plot, sử dụng cùng dữ liệu đầu vào để quan sát sự khác biệt giữa hai phương pháp.
+
+> **Lưu ý:** Kết quả của bản nhóm và Scikit-learn có thể không hoàn toàn giống nhau do khác biệt trong cách tạo spectral embedding hoặc cách khởi tạo K-Means. Vì vậy, không yêu cầu nhãn cụm hay giá trị ARI phải giống nhau tuyệt đối (100%); các chỉ số được dùng để đánh giá mức độ tương đồng và chất lượng phân cụm, không phải để đòi hỏi hai cách triển khai cho kết quả trùng khớp hoàn toàn.
