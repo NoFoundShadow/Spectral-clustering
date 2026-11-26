@@ -128,6 +128,7 @@ def plot_baseline_comparison(
     kmeans_labels: ArrayLike,
     dbscan_labels: ArrayLike,
     *,
+    y: ArrayLike | None = None,
     title: str | None = None,
     save_path: PathLike | None = None,
 ) -> tuple[Figure, NDArray[np.object_]]:
@@ -135,10 +136,12 @@ def plot_baseline_comparison(
 
     ``X`` là cùng dữ liệu 2D đã đưa vào hai thuật toán; hai mảng nhãn có
     shape ``(n_samples,)``. ``title`` là tiêu đề chung tùy chọn của hình.
+    Nếu có ``y``, ô đầu dùng nhãn thật (Ground Truth).
     """
     points = _validate_points(X)
     kmeans = _validate_labels(kmeans_labels, points.shape[0], "kmeans_labels")
     dbscan = _validate_labels(dbscan_labels, points.shape[0], "dbscan_labels")
+    ground_truth = None if y is None else _validate_labels(y, points.shape[0], "y")
 
     figure, axes = plt.subplots(
         1,
@@ -147,7 +150,8 @@ def plot_baseline_comparison(
         sharex=True,
         sharey=True,
     )
-    plot_clusters(points, ax=axes[0], title="Dữ liệu đầu vào")
+    first_title = "Dữ liệu đầu vào" if ground_truth is None else "Ground Truth"
+    plot_clusters(points, ground_truth, ax=axes[0], title=first_title)
     plot_clusters(points, kmeans, ax=axes[1], title="K-Means")
     plot_clusters(points, dbscan, ax=axes[2], title="DBSCAN")
 
